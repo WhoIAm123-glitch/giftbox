@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caja de Regalo Embolicado</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .instructions h2 {
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+            color: #FFD700;
+        }
+
+        .instructions p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .demo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .demo-icon {
+            font-size: 2rem;
+            color: #FFD700;
+            animation: pulse 2s infinite;
+        }
+
+        .demo-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .btn-start {
+            background: linear-gradient(to right, #FF416C, #FF4B2B);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-start:active {
+            transform: translateY(0);
+        }
+
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            margin: 0 auto;
+            display: none;
+        }
+
+        #gift-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            perspective: 1000px;
+        }
+
+        .layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.1s;
+            transform-style: preserve-3d;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ribbon {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .ribbon-horizontal {
+            position: absolute;
+            width: 100%;
+            height: 20px;
+            background-color: #FFD700;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .ribbon-vertical {
+            position: absolute;
+            width: 20px;
+            height: 100%;
+            background-color: #FFD700;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .bow {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-color: #FF416C;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .bow:before, .bow:after {
+            content: '';
+            position: absolute;
+            width: 70px;
+            height: 40px;
+            background-color: #FF416C;
+            border-radius: 50%;
+            top: 10px;
+        }
+
+        .bow:before {
+            left: -45px;
+            transform: rotate(-45deg);
+        }
+
+        .bow:after {
+            right: -45px;
+            transform: rotate(45deg);
+        }
+
+        .counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            z-index: 100;
+        }
+
+        .final-message {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+            animation: fadeIn 1s ease;
+        }
+
+        .qr-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            display: inline-block;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        #qr-code {
+            width: 250px;
+            height: 250px;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        #qr-code img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+
+        .ribbon-falling {
+            animation: fallOff 1.5s ease forwards;
+        }
+
+        .bow-falling {
+            animation: fallOffBow 1.5s ease forwards;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes fallOff {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(500px) rotate(45deg); opacity: 0; }
+        }
+
+        @keyframes fallOffBow {
+            0% { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
+            100% { transform: translate(-50%, 500px) rotate(180deg); opacity: 0; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes layerBreak {
+            0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+            20% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); }
+            40% { transform: translate(-50%, -50%) scale(0.8) rotate(-5deg); }
+            60% { transform: translate(calc(-50% + 50px), calc(-50% - 100px)) scale(0.7) rotate(15deg); }
+            80% { transform: translate(calc(-50% + 100px), calc(-50% + 200px)) scale(0.5) rotate(30deg); opacity: 0.7; }
+            100% { transform: translate(calc(-50% + 150px), calc(-50% + 300px)) scale(0.3) rotate(45deg); opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .instructions {
+                padding: 20px;
+            }
+            
+            .game-container {
+                height: 400px;
+            }
+            
+            #gift-box {
+                width: 250px;
+                height: 250px;
+            }
+            
+            #qr-code {
+                width: 220px;
+                height: 220px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .btn-start {
+                padding: 15px 40px;
+                font-size: 1.3rem;
+            }
+            
+            .game-container {
+                height: 350px;
+            }
+            
+            #gift-box {
+                width: 220px;
+                height: 220px;
+            }
+            
+            #qr-code {
+                width: 200px;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Caja de Regalo Embolicado</h1>
+        <p class="subtitle">¡40 capas por desenvolver!</p>
+        
+        <div class="instructions">
+            <h2>Cómo Jugar</h2>
+            <p>Esta caja de regalo tiene <strong>40 capas de papel</strong> que debes quitar para descubrir lo que hay dentro.</p>
+            <p>Para quitar cada capa, <strong>desliza tu dedo rápidamente</strong> sobre la caja (o haz clic y arrastra con el ratón en PC).</p>
+            <p>Cada capa se romperá con una animación de física 2D y la cuerda cambiará de color. Cuando llegues a la última capa (marrón), la cuerda se desatará y la caja se abrirá.</p>
+            
+            <div class="demo-container">
+                <i class="fas fa-hand-point-up demo-icon"></i>
+                <div class="demo-text">Desliza rápidamente para romper las capas</div>
+            </div>
+        </div>
+        
+        <button class="btn-start" id="start-btn">
+            <i class="fas fa-play-circle"></i> COMENZAR
+        </button>
+        
+        <div class="game-container" id="game-container">
+            <div class="counter" id="counter">Capas: 40</div>
+            <div id="gift-box"></div>
+        </div>
+        
+        <div class="final-message" id="final-message">
+            <h2>¡Felicidades! Has abierto la caja</h2>
+            <div class="qr-container">
+                <div id="qr-code">
+                    <!-- REEMPLAZA LA SIGUIENTE LÍNEA CON TU ARCHIVO PNG DEL QR -->
+                    <img src="tu-codigo-qr.png" alt="Código QR" id="qr-image">
+                    <!-- Si tu archivo tiene otro nombre, cámbialo en el atributo "src" -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const startBtn = document.getElementById('start-btn');
+            const gameContainer = document.getElementById('game-container');
+            const giftBox = document.getElementById('gift-box');
+            const counter = document.getElementById('counter');
+            const finalMessage = document.getElementById('final-message');
+            const qrImage = document.getElementById('qr-image');
+            
+            let layers = [];
+            let currentLayer = 40;
+            let isDragging = false;
+            let startX = 0;
+            let startY = 0;
+            let velocity = 0;
+            let lastTime = 0;
+            
+            // Colores para las capas
+            const layerColors = [
+                '#FF6B6B', '#FF8E53', '#FFD166', '#06D6A0', '#118AB2', 
+                '#073B4C', '#7209B7', '#3A86FF', '#FB5607', '#8338EC',
+                '#FF006E', '#FFBE0B', '#3A86FF', '#1D3557', '#E63946',
+                '#A8DADC', '#457B9D', '#F4A261', '#2A9D8F', '#E76F51',
+                '#264653', '#E9C46A', '#F4A261', '#E76F51', '#2A9D8F',
+                '#8AC926', '#1982C4', '#6A4C93', '#F15BB5', '#00BBF9',
+                '#00F5D4', '#FF97B7', '#9B5DE5', '#FEE440', '#00F5D4',
+                '#FF6B6B', '#FF8E53', '#FFD166', '#06D6A0', '#8B4513' // Última capa marrón
+            ];
+            
+            // Inicializar el juego
+            function initGame() {
+                // Ocultar instrucciones y mostrar juego
+                document.querySelector('.instructions').style.display = 'none';
+                startBtn.style.display = 'none';
+                gameContainer.style.display = 'block';
+                finalMessage.style.display = 'none';
+                
+                // Reiniciar variables
+                layers = [];
+                currentLayer = 40;
+                counter.textContent = `Capas: ${currentLayer}`;
+                
+                // Limpiar la caja de regalo
+                giftBox.innerHTML = '';
+                
+                // Crear las 40 capas
+                for (let i = 0; i < 40; i++) {
+                    const layer = document.createElement('div');
+                    layer.className = 'layer';
+                    layer.style.backgroundColor = layerColors[i];
+                    layer.style.zIndex = 40 - i;
+                    
+                    // Añadir cinta a cada capa (cambia de color)
+                    const ribbon = document.createElement('div');
+                    ribbon.className = 'ribbon';
+                    
+                    const ribbonHorizontal = document.createElement('div');
+                    ribbonHorizontal.className = 'ribbon-horizontal';
+                    ribbonHorizontal.style.backgroundColor = i % 2 === 0 ? '#FFD700' : '#FF416C';
+                    
+                    const ribbonVertical = document.createElement('div');
+                    ribbonVertical.className = 'ribbon-vertical';
+                    ribbonVertical.style.backgroundColor = i % 2 === 0 ? '#FFD700' : '#FF416C';
+                    
+                    ribbon.appendChild(ribbonHorizontal);
+                    ribbon.appendChild(ribbonVertical);
+                    
+                    // Añadir lazo solo a la primera capa
+                    if (i === 0) {
+                        const bow = document.createElement('div');
+                        bow.className = 'bow';
+                        bow.id = 'bow';
+                        layer.appendChild(bow);
+                    }
+                    
+                    layer.appendChild(ribbon);
+                    giftBox.appendChild(layer);
+                    
+                    layers.push({
+                        element: layer,
+                        ribbon: ribbon,
+                        broken: false
+                    });
+                }
+                
+                // Añadir eventos táctiles y de ratón
+                giftBox.addEventListener('mousedown', startDrag);
+                giftBox.addEventListener('touchstart', startDragTouch);
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('touchmove', dragTouch);
+                document.addEventListener('mouseup', endDrag);
+                document.addEventListener('touchend', endDrag);
+            }
+            
+            // Funciones para manejar el arrastre con ratón
+            function startDrag(e) {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                lastTime = Date.now();
+                velocity = 0;
+                e.preventDefault();
+            }
+            
+            function startDragTouch(e) {
+                if (e.touches.length === 1) {
+                    isDragging = true;
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                    lastTime = Date.now();
+                    velocity = 0;
+                    e.preventDefault();
+                }
+            }
+            
+            function drag(e) {
+                if (!isDragging) return;
+                
+                const currentTime = Date.now();
+                const deltaTime = currentTime - lastTime;
+                lastTime = currentTime;
+                
+                const currentX = e.clientX;
+                const deltaX = currentX - startX;
+                
+                // Calcular velocidad
+                velocity = Math.abs(deltaX) / deltaTime;
+                
+                startX = currentX;
+            }
+            
+            function dragTouch(e) {
+                if (!isDragging || e.touches.length !== 1) return;
+                
+                const currentTime = Date.now();
+                const deltaTime = currentTime - lastTime;
+                lastTime = currentTime;
+                
+                const currentX = e.touches[0].clientX;
+                const deltaX = currentX - startX;
+                
+                // Calcular velocidad
+                velocity = Math.abs(deltaX) / deltaTime;
+                
+                startX = currentX;
+                e.preventDefault();
+            }
+            
+            function endDrag() {
+                if (!isDragging) return;
+                
+                // Si la velocidad es suficiente, romper la capa
+                if (velocity > 0.5 && currentLayer > 0) {
+                    breakLayer();
+                }
+                
+                isDragging = false;
+                velocity = 0;
+            }
+            
+            // Función para romper una capa
+            function breakLayer() {
+                if (currentLayer <= 0) return;
+                
+                const layerIndex = 40 - currentLayer;
+                const layer = layers[layerIndex];
+                
+                if (layer.broken) return;
+                
+                layer.broken = true;
+                currentLayer--;
+                counter.textContent = `Capas: ${currentLayer}`;
+                
+                // Animación de rotura
+                layer.element.style.animation = 'layerBreak 1s ease forwards';
+                
+                // Si es la última capa (marrón)
+                if (currentLayer === 0) {
+                    setTimeout(() => {
+                        // Animar la caída de la cinta y el lazo
+                        const ribbons = document.querySelectorAll('.ribbon-horizontal, .ribbon-vertical');
+                        ribbons.forEach(ribbon => {
+                            ribbon.classList.add('ribbon-falling');
+                        });
+                        
+                        const bow = document.getElementById('bow');
+                        if (bow) {
+                            bow.classList.add('bow-falling');
+                        }
+                        
+                        // Mostrar el código QR después de un breve retraso
+                        setTimeout(() => {
+                            gameContainer.style.display = 'none';
+                            finalMessage.style.display = 'block';
+                            
+                            // Asegurarse de que la imagen QR se muestre correctamente
+                            if (qrImage) {
+                                qrImage.style.display = 'block';
+                            }
+                        }, 1500);
+                    }, 1000);
+                }
+                
+                // Cambiar color de la cinta de la siguiente capa
+                if (currentLayer > 0) {
+                    const nextLayerIndex = 40 - currentLayer;
+                    const nextLayer = layers[nextLayerIndex];
+                    const ribbons = nextLayer.element.querySelectorAll('.ribbon-horizontal, .ribbon-vertical');
+                    
+                    // Alternar entre dos colores
+                    const newColor = (nextLayerIndex % 2 === 0) ? '#FF416C' : '#FFD700';
+                    ribbons.forEach(ribbon => {
+                        ribbon.style.backgroundColor = newColor;
+                    });
+                }
+            }
+            
+            // Añadir evento al botón de inicio
+            startBtn.addEventListener('click', initGame);
+            
+            // Para PC, también permitir hacer clic rápido
+            giftBox.addEventListener('click', function(e) {
+                if (!isDragging) {
+                    velocity = 1; // Velocidad suficiente para romper
+                    breakLayer();
+                }
+            });
+            
+            // Añadir soporte para teclado (barra espaciadora)
+            document.addEventListener('keydown', function(e) {
+                if (e.code === 'Space' && gameContainer.style.display === 'block') {
+                    velocity = 1;
+                    breakLayer();
+                    e.preventDefault();
+                }
+            });
+            
+            // Verificar si la imagen QR existe, si no mostrar un placeholder
+            if (qrImage) {
+                qrImage.onerror = function() {
+                    // Si la imagen no se carga, mostrar un placeholder
+                    qrImage.style.display = 'none';
+                    document.getElementById('qr-code').innerHTML = 
+                        '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#f0f0f0; color:#333; border-radius:5px;">' +
+                        '<p style="text-align:center; padding:20px;">Reemplaza "tu-codigo-qr.png"<br>con tu archivo QR</p>' +
+                        '</div>';
+                };
+            }
+        });
+    </script>
+</body>
+</html>
